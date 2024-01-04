@@ -1,10 +1,28 @@
 import './App.css';
 import { Box, Container, VStack, Button, Input, HStack } from '@chakra-ui/react';
 import Message from './Components/Message';
+import { onAuthStateChanged, getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { app } from "./Firebase";
+import { useEffect, useState } from 'react';
+const loginHandler = ()=>{
+  const provider = new GoogleAuthProvider();
+  signInWithPopup( auth, provider)
+}
+  const auth = getAuth(app);
 function App() {
+  const [user, setUser] = useState(false);
+  useEffect(() => {
+    onAuthStateChanged(auth, (data)=>{
+      console.log(data);
+    })
+    return () => {
+    
+    }
+  }, [])
+  
   return (
     <Box bg={"red.50"}>
-      <Container h={"100vh"} bg={"white"}>
+    {user? ( <Container h={"100vh"} bg={"white"}>
       <VStack h="full" padding={"4"}>
         <Button w={"full"} colorScheme={"red"}>Logout</Button>
         <VStack background={"white"} h="full" w={"full"} overflowY={"auto"} >
@@ -24,7 +42,9 @@ function App() {
         </HStack>
         </form>
       </VStack>
-      </Container>
+      </Container>) : <VStack bg={"white"} h={"100vh"} justifyContent={"center"} alignItems={"center"}> 
+      <Button onClick={loginHandler} colorScheme={"purple"}> Sign in with Google</Button></VStack>
+      }
     </Box>
   );
 }
