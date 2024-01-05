@@ -54,7 +54,7 @@ function App() {
     { user ? ( <Container h={"100vh"} bg={"white"}>
       <VStack h="full" padding={"4"}>
         <Button onClick={logoutHandler} w={"full"} colorScheme={"red"}>Logout</Button>
-        <VStack background={"white"} h="full" w={"full"} overflowY={"auto"} >
+        <VStack background={"white"} h="full" w={"full"} overflowY={"auto"} css={{"&::-webkit-scrollbar":{display:none}}} >
         {
           messages.map((item) => (
           <Message key={item.id} user={ item.uid === user.uid ? "me" : "other"} text={item.text} uri={item.uri}/>
