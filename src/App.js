@@ -1,6 +1,6 @@
 import './App.css';
 import { app } from "./Firebase";
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Box, Container, VStack, Button, Input, HStack } from '@chakra-ui/react';
 import Message from './Components/Message';
 import { onAuthStateChanged, getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
@@ -13,26 +13,28 @@ const logoutHandler =()=> signOut(auth);
   const auth = getAuth(app);
   const  db = getFirestore(app);
 function App() {
-  const messageQuery = query(collection(db, "Messages"), orderBy("createdAt", "asc"))
   const [user, setUser] = useState(false);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const divForScroll = useRef(null);
   const submitHandler = async (e)=>{
     e.preventDefault();
     try {
+      setMessage("");
       await addDoc(collection(db , "Messages"), {
         text: message,
         uid: user.uid,
         uri: user.photoURL,
         createdAt: serverTimestamp()
       });
-      setMessage("");
+      divForScroll.current.scrollIntoView({behavior: "smooth"})
     } catch (error) {
       console.error("Firestore Error:", error);
       alert(error.message); // Display the error message
     }
   }
   useEffect(() => {
+    const messageQuery = query(collection(db, "Messages"), orderBy("createdAt", "asc"));
     const unSubscribeForMessage = onSnapshot(messageQuery , (snap)=>{
       setMessages(snap.docs.map((item) => {
         const id = item.id;
@@ -46,8 +48,7 @@ function App() {
       unSubscribe();
       unSubscribeForMessage();
     };
-  });
-  
+  }, []);
   return (
     <Box bg={"red.50"}>
     { user ? ( <Container h={"100vh"} bg={"white"}>
@@ -59,6 +60,7 @@ function App() {
           <Message key={item.id} user={ item.uid === user.uid ? "me" : "other"} text={item.text} uri={item.uri}/>
         ))
         }
+        <div ref={divForScroll}></div>
         </VStack>
         <form onSubmit={submitHandler} style={{width:"100%"}}>
         <HStack h="full" w={"full"}>
