@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Box, Container, VStack, Button, Input, HStack } from '@chakra-ui/react';
 import Message from './Components/Message';
 import { onAuthStateChanged, getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
-import { getFirestore, addDoc, collection, serverTimestamp, onSnapshot} from "firebase/firestore";
+import { getFirestore, addDoc, collection, serverTimestamp, onSnapshot, query, orderBy } from "firebase/firestore";
 const loginHandler = ()=>{
   const provider = new GoogleAuthProvider();
   signInWithPopup( auth, provider)
@@ -13,6 +13,7 @@ const logoutHandler =()=> signOut(auth);
   const auth = getAuth(app);
   const  db = getFirestore(app);
 function App() {
+  const messageQuery = query(collection(db, "Messages"), orderBy("createdAt", "asc"))
   const [user, setUser] = useState(false);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
@@ -32,7 +33,7 @@ function App() {
     }
   }
   useEffect(() => {
-    const unSubscribeForMessage = onSnapshot(collection(db, "Messages") , (snap)=>{
+    const unSubscribeForMessage = onSnapshot(messageQuery , (snap)=>{
       setMessages(snap.docs.map((item) => {
         const id = item.id;
         return{id, ...item.data()}
